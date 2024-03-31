@@ -1,24 +1,51 @@
-import logo from './logo.svg';
+import Layout from './components/Layout';
+import Signin from './Pages/Signin/Signin';
+import BookList from './Pages/BookList/BookList';
+import SpecificBook from './Pages/SpecificBook/SpecificBook'
+import Cart from './Pages/Cart/Cart';
+import ErrorPage from './Pages/ErrorPage/ErrorPage';
+import RequireAuth from './hoc/RequireAuth';
+import { AuthProvider } from './context/AuthProvider';
+import { CartProvider } from './context/CartProvider';
+import {BooksContext} from './context/use-books';
+import { useEffect, useState } from 'react';
+import dataBooks from './data/books.json';
 import './App.css';
+import { Route, Routes } from 'react-router-dom';
+
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+ 
+  console.log("render app");
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    setBooks(dataBooks.books);
+  }, [books]);
+  
+  return ( 
+    <BooksContext.Provider value={books}>
+    <AuthProvider>
+    <CartProvider>
+      <Routes>
+        <Route path='/' element={<Layout />}>
+          <Route index element={<Signin />}></Route>
+          <Route path='booklist' element={
+              <RequireAuth><BookList /></RequireAuth>}>
+          </Route>
+          <Route path='booklist/:id' element={
+              <RequireAuth><SpecificBook /></RequireAuth>}>
+          </Route>
+          <Route path='cart' element={
+              <RequireAuth><Cart /></RequireAuth>}>
+          </Route>
+          <Route path='*' element={<ErrorPage />}></Route>
+        </Route>
+        
+      </Routes>
+    </CartProvider>
+    </AuthProvider>
+    </BooksContext.Provider>
   );
 }
 
