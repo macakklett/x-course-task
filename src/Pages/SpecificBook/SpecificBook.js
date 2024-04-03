@@ -3,39 +3,72 @@ import { useParams } from 'react-router-dom';
 import { BooksContext } from '../../context/use-books';
 import { useCart } from '../../hook/useCart';
 
-import imageAlternative from './imageNotFound.png'
+import imageAlternative from './imageNotFound.png';
 
 const SpecificBook = () => {
   const { id } = useParams();
   const [book, setBook] = useState({});
   const [count, setCount] = useState(1);
   const books = useContext(BooksContext);
-  const { addBooksToCart } = useCart();
+  const { booksCart, addBooksToCart } = useCart();
 
   useEffect(() => {
     const result = books.find(el => parseInt(el.id) === parseInt(id));
     setBook(result);
   }, [id, books]);
 
+  const addedToCart = booksCart.filter(el => parseInt(el.id) === parseInt(id));
+
   const handleAdd = () => {
-    addBooksToCart(id, count);
-    setCount(0);
-  }
+    if (count > 0) {
+      addBooksToCart(id, count);
+      setCount(0);
+    }
+  };
+
+  const handleCountChange = value => {
+    const newCount = Number(value);
+    if (!isNaN(newCount) && newCount >= 0 ) {
+      if(newCount > book.amount) {
+        setCount(Number(book.amount)); 
+      } else{
+        setCount(newCount);
+      }
+    }
+  };
 
   return (
     <div>
       {book && (
         <>
-          <img src={book.image || imageAlternative} alt='Book`s look title'/>
+          <img src={book.image || imageAlternative} alt="Book's look title" />
           <div>{book.title}</div>
-          {/* <div>{book.author}</div>
-          <div>{book.level}</div>
-          <div>Tags:{book.tags && book.tags.map((tag, index) => <div key={index}>{tag}</div>)}</div>
-          <div>{book.description}</div> */}
-          <button onClick={() => setCount((number) => number - 1)}>-</button>
-          <input type='text' value={count} onChange={(e) => setCount(Number(e.target.value))} />
-          <button onClick={() => setCount((number) => number + 1)}>+</button>
-          <button onClick={handleAdd}>Add to Cart</button>
+          {addedToCart.length === 0 ? (
+            <>
+              <button
+                onClick={() => handleCountChange(count - 1)}
+                disabled={count <= 0}
+              >
+                -
+              </button>
+              <input
+                type="text"
+                value={count}
+                onChange={e => handleCountChange(e.target.value)}
+              />
+              <button
+                onClick={() => handleCountChange(count + 1)}
+                disabled={count >= book.amount}
+              >
+                +
+              </button>
+              <button onClick={handleAdd}>Add to Cart</button>
+            </>
+          ) : (
+            <>
+              The book added to cart already!!!
+            </>
+          )}
         </>
       )}
     </div>

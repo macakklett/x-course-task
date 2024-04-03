@@ -12,7 +12,7 @@ export const CartProvider = ({ children }) => {
     const addBooksToCart = (id, count) => {
         const result = books.find(el => parseInt(el.id) === parseInt(id));
         const total = result.price * count;
-        const list = [{title: result.title, count, total}, ...booksCart];
+        const list = [{id, title: result.title, count, total}, ...booksCart];
         setBooksCart(list);
         navigate('/cart', {replace: true});
     }
